@@ -12,6 +12,12 @@ export default class FileMemoryRepository implements FileRepository {
     return Promise.resolve(fileInfo);
   }
 
+  getByPath(path: string): Promise<FileInfo[]> {
+    const allFilesInfo = Object.values(this.FILES);
+    const filesByPath = allFilesInfo.filter((f) => f.path.includes(path));
+    return Promise.resolve(filesByPath);
+  }
+
   save(fileInfo: FileInfo): Promise<string> {
     const nextId = Object.values(this.FILES).length + 1;
     this.FILES[nextId] = {
@@ -19,5 +25,10 @@ export default class FileMemoryRepository implements FileRepository {
       id: nextId.toString(),
     };
     return Promise.resolve(nextId.toString());
+  }
+
+  clear(): Promise<void> {
+    this.FILES = {};
+    return Promise.resolve();
   }
 }

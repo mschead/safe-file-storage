@@ -5,14 +5,18 @@ import LinkBuilderLocalGateway from 'src/infra/gateway/LinkBuilderLocalGateway';
 import GetFileInformationUseCase from 'src/application/usecase/GetFileInformationUseCase';
 import { middlewareUpload } from 'src/middleware/multer';
 import UploadFileUseCase from 'src/application/usecase/UploadFileUseCase';
+import GetFilesByPathUseCase from 'src/application/usecase/GetFilesByPathUseCase';
+import cors from 'cors';
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 const fileRepository = new FileMemoryRepository();
 const linkBuilderGateway = new LinkBuilderLocalGateway();
 const uploadFile = new UploadFileUseCase(fileRepository, linkBuilderGateway);
 const getFileInformation = new GetFileInformationUseCase(fileRepository, linkBuilderGateway);
+const getFilesByPath = new GetFilesByPathUseCase(fileRepository);
 
 app.get('/', async function (request: Request, response: Response) {
   response.send('Hello World!');
@@ -57,10 +61,18 @@ app.get(
   },
   async function (req: Request, res: Response) {
     const fileStream = fs.createReadStream(`uploads/${req.params.id}`);
-    res.setHeader('Content-Disposition', 'attachment: fileId="' + req.params.id + '"');
+    const fileInfo = await fileRepository.getById(req.params.id);
+    res.setHeader('Content-Disposition', 'attachment; filename="' + fileInfo.fileName + '"');
     fileStream.pipe(res);
   },
 );
+
+app.get('/files', async function (req: Request, res: Response) {
+  const filePath = req.query.path;
+  if (!filePath) throw new Error("Path doesn't exist");
+  const output = await getFilesByPath.execute({ path: filePath.toString() });
+  res.json(output);
+});
 
 app.listen(4000, () => {
   console.log('Listening ...');
