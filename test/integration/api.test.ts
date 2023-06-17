@@ -15,7 +15,7 @@ it('should upload the file properly', async () => {
 
   const expectedFileContent = 'This is just a random information.';
   const formData = new FormData();
-  const formDataStream = fs.createReadStream(path.join(__dirname, '../uploads/', 'test.txt'));
+  const formDataStream = fs.createReadStream(path.join(__dirname, '../../uploads/', 'test.txt'));
   formData.append('content', formDataStream);
   await axios.post(outputOne.downloadUrl, formData);
 
@@ -32,5 +32,5 @@ it('should upload the file properly', async () => {
   const outputThree = resThree.data;
   expect(expectedFileContent).toBe(outputThree);
 
-  fs.unlinkSync(path.join(__dirname, `../uploads/${outputOne.id}`));
+  fs.unlinkSync(path.join(__dirname, `../../uploads/${outputOne.id}`));
 });
