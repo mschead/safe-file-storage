@@ -1,7 +1,6 @@
 import axios from 'axios';
 import FormData from 'form-data';
 import fs from 'fs';
-import path from 'path';
 
 const api = axios.create({ baseURL: 'http://localhost:4000' });
 
@@ -27,9 +26,7 @@ it('should upload the file properly', async () => {
 
   const expectedFileContent = 'This is just a random information.';
   const formData = new FormData();
-  const formDataStream = fs.createReadStream(
-    path.join(__dirname, '../../uploads/', 'test-file.txt'),
-  );
+  const formDataStream = fs.createReadStream('uploads/test-file.txt');
   formData.append('content', formDataStream);
   await api.post(outputOne.downloadUrl, formData);
 
@@ -46,7 +43,7 @@ it('should upload the file properly', async () => {
   const outputThree = resThree.data;
   expect(expectedFileContent).toBe(outputThree);
 
-  fs.unlinkSync(path.join(__dirname, `../../uploads/${outputOne.id}`));
+  fs.unlinkSync(`uploads/${outputOne.id}`);
 });
 
 it('should get the files by path', async () => {
@@ -58,9 +55,7 @@ it('should get the files by path', async () => {
   const outputOne = resOne.data;
 
   const formData = new FormData();
-  const formDataStream = fs.createReadStream(
-    path.join(__dirname, '../../uploads/', 'test-file.txt'),
-  );
+  const formDataStream = fs.createReadStream('uploads/test-file.txt');
   formData.append('content', formDataStream);
   await axios.post(outputOne.downloadUrl, formData);
 
@@ -73,7 +68,7 @@ it('should get the files by path', async () => {
     path: payload.path,
   });
 
-  fs.unlinkSync(path.join(__dirname, `../../uploads/${outputOne.id}`));
+  fs.unlinkSync(`uploads/${outputOne.id}`);
 });
 
 it('should create an user', async () => {
