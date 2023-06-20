@@ -36,9 +36,17 @@ app.get('/', async function (request: Request, response: Response) {
   response.send('Hello World!');
 });
 
+const parseError = (err: unknown) => {
+  return err instanceof Error ? err.message : 'Unexpected operation.';
+};
+
 app.post('/file', verifyUserExpress.verify, async function (req: Request, res: Response) {
-  const output = await uploadFile.execute({ fileName: req.body.fileName, path: req.body.path });
-  res.json({ id: output.id, downloadUrl: output.downloadUrl });
+  try {
+    const output = await uploadFile.execute({ fileName: req.body.fileName, path: req.body.path });
+    res.json({ id: output.id, downloadUrl: output.downloadUrl });
+  } catch (err: unknown) {
+    res.status(500).json({ message: parseError(err) });
+  }
 });
 
 app.post(
@@ -58,9 +66,13 @@ app.post(
 );
 
 app.get('/file/:id', verifyUserExpress.verify, async function (req: Request, res: Response) {
-  const id = req.params.id;
-  const output = await getFileInformation.execute({ id });
-  res.json(output);
+  try {
+    const id = req.params.id;
+    const output = await getFileInformation.execute({ id });
+    res.json(output);
+  } catch (err: unknown) {
+    res.status(500).json({ message: parseError(err) });
+  }
 });
 
 app.get(
@@ -74,38 +86,54 @@ app.get(
     next();
   },
   async function (req: Request, res: Response) {
-    const fileStream = fs.createReadStream(`uploads/${req.params.id}`);
-    const fileInfo = await fileRepository.getById(req.params.id);
-    res.setHeader('Content-Disposition', 'attachment; filename="' + fileInfo.fileName + '"');
-    fileStream.pipe(res);
+    try {
+      const fileStream = fs.createReadStream(`uploads/${req.params.id}`);
+      const fileInfo = await fileRepository.getById(req.params.id);
+      res.setHeader('Content-Disposition', 'attachment; filename="' + fileInfo.fileName + '"');
+      fileStream.pipe(res);
+    } catch (err: unknown) {
+      res.status(500).json({ message: parseError(err) });
+    }
   },
 );
 
 app.get('/files', verifyUserExpress.verify, async function (req: Request, res: Response) {
-  const filePath = req.query.path;
-  if (!filePath) throw new Error("Path doesn't exist");
-  const output = await getFilesByPath.execute({ path: filePath.toString() });
-  res.json(output);
+  try {
+    const filePath = req.query.path;
+    if (!filePath) throw new Error("Path doesn't exist");
+    const output = await getFilesByPath.execute({ path: filePath.toString() });
+    res.json(output);
+  } catch (err: unknown) {
+    res.status(500).json({ message: parseError(err) });
+  }
 });
 
 app.post(
   '/user/sign-in',
   async function (req: Request<{}, {}, { username: string; password: string }>, res: Response) {
-    const { username, password } = req.body;
-    if (!username || !password) throw new Error('Missing Credentials!');
-    await signInUseCase.execute({ username, password });
-    res.end();
+    try {
+      const { username, password } = req.body;
+      if (!username || !password) throw new Error('Missing Credentials!');
+      await signInUseCase.execute({ username, password });
+      res.end();
+    } catch (err: unknown) {
+      res.status(500).json({ message: parseError(err) });
+    }
   },
 );
 
 app.get('/user/log-in', async function (req: Request, res: Response) {
-  const { username, password } = req.query;
-  if (!username || !password) throw new Error('Wrong Credentials!');
-  const output = await logInUseCase.execute({
-    username: username.toString(),
-    password: password.toString(),
-  });
-  res.json(output);
+  try {
+    const { username, password } = req.query;
+    if (!username || !password) throw new Error('Wrong Credentials!');
+    const output = await logInUseCase.execute({
+      username: username.toString(),
+      password: password.toString(),
+    });
+    res.json(output);
+  } catch (err: unknown) {
+    res.status(500).json({ message: parseError(err) });
+  }
 });
 
 app.listen(4000, () => {
