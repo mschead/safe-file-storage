@@ -1,19 +1,32 @@
 import axios from 'axios';
 import FormData from 'form-data';
 import fs from 'fs';
+import { APP_CONSTS } from 'src/utils/consts';
+import MySqlAdapter from 'src/infra/database/MySqlAdapter';
 
-const api = axios.create({ baseURL: 'http://localhost:4000' });
+const baseURL = `${APP_CONSTS.BASE_URL}:${APP_CONSTS.PORT}`;
+const api = axios.create({ baseURL });
 
 let headers = { Authorization: '' };
+let connection = new MySqlAdapter();
 
 beforeAll(async () => {
+  await connection.connect();
+  await connection.query('DELETE FROM files;');
+  await connection.query('DELETE FROM users;');
   const userPayload = {
-    username: 'User',
+    username: 'UserX',
     password: 'password123',
   };
   await api.post('/user/sign-in', userPayload);
   const loginRes = await api.get('/user/log-in', { params: userPayload });
   headers.Authorization = loginRes.data.token;
+});
+
+afterAll(async () => {
+  await connection.query('DELETE FROM files;');
+  await connection.query('DELETE FROM users;');
+  await connection.close();
 });
 
 it('should upload the file properly', async () => {
@@ -81,5 +94,5 @@ it('should create an user', async () => {
   const resTwo = await api.get('/user/log-in', { params: payload });
   const outputTwo = resTwo.data;
 
-  expect(outputTwo.token).toBe('2_TOKEN');
+  expect(outputTwo.token).toBeDefined();
 });

@@ -9,7 +9,7 @@ export default class UploadFileUseCase {
   ) {}
 
   async execute(input: Input): Promise<Output> {
-    const fileInfo = new FileInfo(input.fileName, input.path);
+    const fileInfo = new FileInfo(input.fileName, input.path, input.userId);
     const id = await this.fileRepository.save(fileInfo);
     const downloadUrl = await this.linkBuilderGateway.generateLink(id);
 
@@ -23,6 +23,7 @@ export default class UploadFileUseCase {
 interface Input {
   fileName: string;
   path: string;
+  userId: string;
 }
 
 interface Output {

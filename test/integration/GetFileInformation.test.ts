@@ -1,16 +1,17 @@
 import GetFileInformationUseCase from 'src/application/usecase/GetFileInformationUseCase';
+import { APP_CONSTS } from 'src/utils/consts';
 import FileInfo from 'src/domain/FileInfo';
 import LinkBuilderLocalGateway from 'src/infra/gateway/LinkBuilderLocalGateway';
 import FileMemoryRepository from 'src/infra/repository/FileMemoryRepository';
 
-const BASE_URL = 'http://localhost:4000';
+const baseURL = `${APP_CONSTS.BASE_URL}:${APP_CONSTS.PORT}`;
 
 it('should get the file information', async () => {
   const fileName = 'my-notes.txt';
   const path = '/documents';
 
   const fileRepository = new FileMemoryRepository();
-  const id = await fileRepository.save(new FileInfo(fileName, '/documents'));
+  const id = await fileRepository.save(new FileInfo(fileName, '/documents', '1'));
 
   const linkBuilderGateway = new LinkBuilderLocalGateway();
   await linkBuilderGateway.generateLink(id);
@@ -21,5 +22,5 @@ it('should get the file information', async () => {
   expect(output.id).toBe(id);
   expect(output.fileName).toBe(fileName);
   expect(output.path).toBe(path);
-  expect(output.downloadUrl).toBe(`${BASE_URL}/upload-content/${id}`);
+  expect(output.downloadUrl).toBe(`${baseURL}/upload-content/${id}`);
 });

@@ -12,7 +12,8 @@ export default class VerifyUserExpress {
     }
 
     try {
-      await this.jwtToken.verify(jwt);
+      const userId = await this.jwtToken.verify(jwt);
+      req.body.userId = userId;
       next();
     } catch (err) {
       res.status(403).send('JWT is wrong!').end();
