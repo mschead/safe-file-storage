@@ -20,6 +20,6 @@ export default class JwtTokenMemory implements JwtToken {
   verify(token: string): Promise<string> {
     const jwtToken = Object.values(this.TOKENS).find((j) => j.token === token);
     if (!jwtToken) throw new Error('Token verify failed!');
-    return Promise.resolve(jwtToken.token);
+    return Promise.resolve(jwtToken.userId);
   }
 }
