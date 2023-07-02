@@ -11,6 +11,8 @@ let headers = { Authorization: '' };
 let connection = new MySqlAdapter();
 
 beforeAll(async () => {
+  fs.mkdirSync('uploads');
+  fs.writeFileSync('uploads/test-file.txt', 'This is just a random information.');
   await connection.connect();
   await connection.query('DELETE FROM files;');
   await connection.query('DELETE FROM users;');
@@ -27,6 +29,7 @@ afterAll(async () => {
   await connection.query('DELETE FROM files;');
   await connection.query('DELETE FROM users;');
   await connection.close();
+  fs.rmSync('uploads', { recursive: true, force: true });
 });
 
 it('should upload the file properly', async () => {
