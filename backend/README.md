@@ -27,8 +27,18 @@ Make sure to create the database before running the project.
 
 ## ☕ Running
 
-Just run the command below:
+The command below will start the server.
 
 ```
 yarn start:local
 ```
+
+## 🔥 Testing
+
+It will run the unit and integrations test cases.
+
+```
+yarn test
+```
+
+PS: the server must be running for the integration tests.
